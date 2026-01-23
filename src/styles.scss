@@ -1,1 +1,27 @@
-/* You can add global styles to this file, and also import other style files */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  color: #2d3748;
+}
+
+:root {
+  --sage: #8B9D83;
+  --sage-light: #A8BAA0;
+  --sage-dark: #6B7D63;
+  --terracotta: #C8A882;
+  --cream: #F7F5F2;
+  --charcoal: #2C2C2C;
+  --success: #48bb78;
+  --warning: #f6ad55;
+  --danger: #f56565;
+  --info: #4299e1;
+}
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
