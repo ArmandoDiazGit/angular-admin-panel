@@ -1,46 +1,78 @@
-🛠️ Admin Panel (Angular)
+## 🛠️ Admin Panel (Angular)
 
 This repository contains an Admin Panel built with Angular.
 The project is currently a work in progress and is being developed as the management interface for a Spa & Massage booking application.
 
 The purpose of this admin panel is to allow administrators to view and manage bookings made through the customer-facing app.
 
-🚀 Tech Stack
+## 🚀 Tech Stack
 
-Frontend
+* Frontend
+    * Angular
+    * TypeScript
+    * HTML
+    * CSS
+    * Backend (In Progress)
+    * FastAPI (planned)
+    * REST API
 
-Angular
+## ✨ Current Features
 
-TypeScript
+* Admin panel UI layout
 
-HTML
+* Bookings view (structure in place)
 
-CSS
+* Component-based architecture
 
-Backend (In Progress)
+## 🔒 Planned Features
 
-FastAPI (planned)
+* Admin login and authentication
 
-REST API
+* Secure role-based access
 
-✨ Current Features
+* Integration with FastAPI backend
 
-Admin panel UI layout
+* View all bookings from the Spa & Massage app
 
-Bookings view (structure in place)
+* Edit and delete bookings
 
-Component-based architecture
+* Improved UI and data tables
 
-🔒 Planned Features
+## ⚙️ Setup & Installation
 
-Admin login and authentication
+* Clone the repository
 
-Secure role-based access
+* git clone https://github.com/your-username/admin-panel-angular.git
 
-Integration with FastAPI backend
+* Install dependencies
 
-View all bookings from the Spa & Massage app
+* npm install
 
-Edit and delete bookings
+* Run the application
 
-Improved UI and data tables
+* ng serve
+
+* Open in browser
+
+* Navigate to http://localhost:4200
+
+## 🎯 Project Goal
+
+* This admin panel is being built to:
+
+* Manage bookings from the Spa & Massage customer app
+
+* Practice Angular application structure at scale
+
+* Integrate a frontend admin dashboard with a FastAPI backend
+
+* Strengthen full-stack development skills
+
+## 🚧 Status
+
+This project is under active development
+Features and structure are evolving as the backend API is completed.
+
+## 🤝 Contributions
+
+Suggestions and feedback are welcome. Feel free to open an issue or follow the project as it progresses.
