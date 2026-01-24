@@ -1,59 +1,46 @@
-# BookingApp
+🛠️ Admin Panel (Angular)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.1.8.
+This repository contains an Admin Panel built with Angular.
+The project is currently a work in progress and is being developed as the management interface for a Spa & Massage booking application.
 
-## Development server
+The purpose of this admin panel is to allow administrators to view and manage bookings made through the customer-facing app.
 
-To start a local development server, run:
+🚀 Tech Stack
 
-```bash
-ng serve
-```
+Frontend
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Angular
 
-## Code scaffolding
+TypeScript
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+HTML
 
-```bash
-ng generate component component-name
-```
+CSS
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Backend (In Progress)
 
-```bash
-ng generate --help
-```
+FastAPI (planned)
 
-## Building
+REST API
 
-To build the project run:
+✨ Current Features
 
-```bash
-ng build
-```
+Admin panel UI layout
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Bookings view (structure in place)
 
-## Running unit tests
+Component-based architecture
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+🔒 Planned Features
 
-```bash
-ng test
-```
+Admin login and authentication
 
-## Running end-to-end tests
+Secure role-based access
 
-For end-to-end (e2e) testing, run:
+Integration with FastAPI backend
 
-```bash
-ng e2e
-```
+View all bookings from the Spa & Massage app
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Edit and delete bookings
 
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Improved UI and data tables
