@@ -54,7 +54,7 @@ The purpose of this admin panel is to allow administrators to view and manage bo
 
 * Open in browser
 
-* Navigate to http://localhost:4200
+* Navigate to http://localhost:4200/admin
 
 ## 🎯 Project Goal
 
