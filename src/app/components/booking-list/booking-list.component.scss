@@ -178,6 +178,34 @@
   transform: translateY(-2px);
 }
 
+.refresh-button.refreshing {
+  opacity: 0.7;
+  cursor: default;
+  pointer-events: none;
+}
+
+.refresh-icon {
+  display: inline-block;
+}
+
+.refresh-icon.spinning {
+  animation: spin 1s linear infinite;
+}
+
+.live-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: #a0aec0;
+  font-weight: 500;
+  margin-left: 8px;
+}
+
+.live-indicator.connected {
+  color: var(--success);
+}
+
 /* Loading State */
 .loading-state {
   text-align: center;

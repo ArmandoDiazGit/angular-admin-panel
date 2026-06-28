@@ -1,28 +1,47 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, startWith, switchMap } from 'rxjs';
 import { Booking } from '../models/booking';
 import { BookingsResponse } from '../models/bookingResponse-model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class BookingService {
-  private _apiUrl = 'http://127.0.0.1:8000/api';
+  private _apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private _ngZone: NgZone,
+  ) {}
 
   getAllBookings(): Observable<BookingsResponse> {
-    return this.http
-      .get<BookingsResponse>(`${this._apiUrl}/bookings`)
-      .pipe(map((response) => response));
+    return this.http.get<BookingsResponse>(`${this._apiUrl}/bookings`);
+  }
+
+  private subscribeToEvents(): Observable<void> {
+    return new Observable<void>((observer) => {
+      const source = new EventSource(`${this._apiUrl}/events`);
+      source.onmessage = () => {
+        this._ngZone.run(() => observer.next());
+      };
+      source.onerror = () => {};
+      return () => source.close();
+    });
+  }
+
+  watchBookings(): Observable<BookingsResponse> {
+    return this.subscribeToEvents().pipe(
+      startWith(undefined),
+      switchMap(() => this.getAllBookings()),
+    );
   }
 
   updateBookingStatus(
     booking: Booking,
-    status: string,
-  ): Observable<BookingsResponse> {
+    status: Booking['status'],
+  ): Observable<void> {
     const payload = {
       name: booking.name,
       email: booking.email,
@@ -34,14 +53,14 @@ export class BookingService {
       status: status,
       scheduled_at: booking.scheduled_at,
     };
-    return this.http.put<BookingsResponse>(
+    return this.http.put<void>(
       `${this._apiUrl}/booking/${booking.id}`,
       payload,
     );
   }
 
-  deleteBooking(bookingId: number): Observable<BookingsResponse> {
-    return this.http.delete<BookingsResponse>(
+  deleteBooking(bookingId: number): Observable<void> {
+    return this.http.delete<void>(
       `${this._apiUrl}/booking/${bookingId}`,
     );
   }

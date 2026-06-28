@@ -41,19 +41,21 @@
 
   <div class="controls-section">
     <div class="search-box">
-      <input
-        type="text"
-        [(ngModel)]="searchTerm"
-        (input)="onSearchChange()"
-        placeholder="🔍 Search by name"
-        class="search-input"
-      />
+        <input
+          type="text"
+          name="searchTerm"
+          [(ngModel)]="searchTerm"
+          (input)="onSearchChange()"
+          placeholder="🔍 Search by name"
+          class="search-input"
+        />
     </div>
 
     <div class="filters">
       <div class="filter-group">
         <label>Status:</label>
         <select
+          name="statusFilter"
           [(ngModel)]="statusFilter"
           (change)="onStatusFilterChange()"
           class="filter-select"
@@ -65,9 +67,11 @@
         </select>
       </div>
 
-      <button (click)="loadBookings()" class="refresh-button">
-        🔄 Refresh
+      <button (click)="loadBookings()" class="refresh-button" [class.refreshing]="refreshing">
+        <span class="refresh-icon" [class.spinning]="refreshing">🔄</span>
+        {{ refreshing ? 'Refreshing...' : 'Refresh' }}
       </button>
+      <span class="live-indicator" [class.connected]="!loading && !error">● Live</span>
     </div>
   </div>
 
@@ -133,10 +137,10 @@
           <td>
             <div class="appointment-info">
               <div class="appointment-date">
-                📅 {{ formatDate(booking.scheduled_at) }}
+                📅 {{ booking.scheduled_at | formatDate }}
               </div>
               <div class="appointment-time">
-                🕐 {{ to12Hour(booking.time) }}
+                🕐 {{ booking.time | to12Hour }}
               </div>
             </div>
           </td>
@@ -152,7 +156,7 @@
           <td>
             <span
               class="status-badge"
-              [ngClass]="getStatusClass(booking.status)"
+              [ngClass]="booking.status | statusClass"
             >
               {{ booking.status | uppercase }}
             </span>

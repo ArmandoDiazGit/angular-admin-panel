@@ -4,26 +4,33 @@ import {
   viewChild,
   effect,
   OnDestroy,
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
 } from '@angular/core';
 import { BookingService } from '../../services/booking.service';
+import { BookingUtilsService } from '../../services/booking-utils.service';
 import { Booking } from '../../models/booking';
 import { UpperCasePipe, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatTableModule } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { SnackbarComponent } from '../snackbar-component/snackbar.component';
-import { interval, startWith, Subject, switchMap, takeUntil } from 'rxjs';
+import { FormatDatePipe } from '../../pipes/format-date.pipe';
+import { To12HourPipe } from '../../pipes/to-12-hour.pipe';
+import { StatusClassPipe } from '../../pipes/status-class.pipe';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-booking-list',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     UpperCasePipe,
     CommonModule,
     FormsModule,
-    MatTableModule,
     SnackbarComponent,
+    FormatDatePipe,
+    To12HourPipe,
+    StatusClassPipe,
   ],
   templateUrl: './booking-list.component.html',
   styleUrl: './booking-list.component.scss',
@@ -32,7 +39,9 @@ export class BookingListComponent implements OnInit, OnDestroy {
   bookings: Booking[] = [];
   filteredBookings: Booking[] = [];
   loading: boolean = true;
+  initialLoad: boolean = true;
   error: string = '';
+  refreshing: boolean = false;
 
   searchTerm: string = '';
   statusFilter: string = 'all';
@@ -54,8 +63,9 @@ export class BookingListComponent implements OnInit, OnDestroy {
 
   constructor(
     private _bookingService: BookingService,
+    private _bookingUtils: BookingUtilsService,
     private _dialog: MatDialog,
-    private _changeDetectorRef: ChangeDetectorRef,
+    private _cdr: ChangeDetectorRef,
   ) {
     effect(() => {
       if (this._showSnackbar) {
@@ -65,24 +75,28 @@ export class BookingListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    interval(5000)
-      .pipe(
-        startWith(0),
-        takeUntil(this._destroy$),
-        switchMap(() => this._bookingService.getAllBookings()),
-      )
+    this._bookingService
+      .watchBookings()
+      .pipe(takeUntil(this._destroy$))
       .subscribe({
         next: (bookings) => {
           this.loading = false;
           this.error = '';
+          this.refreshing = false;
           this.bookings = bookings;
-
-          this.calculateStats();
-          this.applyFilters();
+          this.refreshDisplay();
+          this.initialLoad = false;
+          this._cdr.markForCheck();
         },
         error: () => {
-          this.error = 'Failed to load bookings. Please try again.';
-          this.loading = false;
+          if (this.initialLoad) {
+            this.error = 'Failed to load bookings. Please try again.';
+            this.loading = false;
+            this._cdr.markForCheck();
+          } else {
+            this.snackbarMessage = 'Failed to refresh bookings';
+            this._showSnackbar = true;
+          }
         },
       });
   }
@@ -93,88 +107,45 @@ export class BookingListComponent implements OnInit, OnDestroy {
   }
 
   loadBookings(): void {
-    this.loading = true;
-    this.error = '';
-    this.searchTerm = '';
+    this.refreshing = true;
     this._bookingService
       .getAllBookings()
       .pipe(takeUntil(this._destroy$))
       .subscribe({
         next: (bookings) => {
-          this.loading = false;
+          this.refreshing = false;
           this.bookings = bookings;
-          this.calculateStats();
-          this.applyFilters();
-          this._changeDetectorRef.detectChanges();
+          this.refreshDisplay();
+          this._cdr.markForCheck();
         },
         error: () => {
-          this.error = 'Failed to load bookings. Please try again.';
-          this.loading = false;
+          this.refreshing = false;
+          this.snackbarMessage = 'Failed to refresh bookings';
+          this._showSnackbar = true;
+          this._cdr.markForCheck();
         },
       });
   }
 
-  calculateStats(): void {
-    this.stats.total = this.bookings?.length;
-    this.stats.pending = this.bookings?.filter(
-      (b) => b.status === 'pending',
-    ).length;
-    this.stats.confirmed = this.bookings.filter(
-      (b) => b.status === 'confirmed',
-    ).length;
-    this.stats.cancelled = this.bookings.filter(
-      (b) => b.status === 'cancelled',
-    ).length;
-  }
-
-  applyFilters(): void {
-    let filtered = [...this.bookings];
-
-    if (this.statusFilter !== 'all') {
-      filtered = filtered.filter((b) => b.status === this.statusFilter);
-    }
-
-    if (this.searchTerm) {
-      const term = this.searchTerm.toLowerCase();
-      let name = filtered.filter((b) =>
-        b.name.toLocaleLowerCase().includes(term),
-      );
-      filtered = name;
-    }
-
-    filtered.sort((a, b) => {
-      let comparison = 0;
-
-      switch (this.sortBy) {
-        case 'date':
-          comparison =
-            new Date(a.date + ' ' + a.time).getTime() -
-            new Date(b.date + ' ' + b.time).getTime();
-          break;
-        case 'created':
-          comparison =
-            new Date(a.created).getTime() - new Date(b.created).getTime();
-          break;
-        case 'name':
-          comparison = a.name.localeCompare(b.name);
-          break;
-      }
-
-      return this.sortOrder === 'asc' ? comparison : -comparison;
+  private refreshDisplay(): void {
+    this.stats = this._bookingUtils.calculateStats(this.bookings);
+    this.filteredBookings = this._bookingUtils.filterAndSort(this.bookings, {
+      statusFilter: this.statusFilter,
+      searchTerm: this.searchTerm,
+      sortBy: this.sortBy,
+      sortOrder: this.sortOrder,
     });
-
-    this.filteredBookings = filtered;
   }
 
   onSearchChange(): void {
-    this.applyFilters();
+    this.refreshDisplay();
   }
 
   onStatusFilterChange(): void {
-    this.applyFilters();
+    this.refreshDisplay();
   }
 
-  updateStatus(booking: Booking, newStatus: string): void {
+  updateStatus(booking: Booking, newStatus: Booking['status']): void {
     const dialogRef = this._dialog.open(ConfirmDialogComponent, {
       width: '500px',
       data: {
@@ -183,25 +154,23 @@ export class BookingListComponent implements OnInit, OnDestroy {
       },
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().pipe(takeUntil(this._destroy$)).subscribe((result) => {
       if (result) {
         this._bookingService
           .updateBookingStatus(booking, newStatus)
           .pipe(takeUntil(this._destroy$))
           .subscribe({
-            next: (res) => {
-              booking.status = newStatus as
-                | 'pending'
-                | 'confirmed'
-                | 'cancelled';
-              this.calculateStats();
-              this.applyFilters();
+            next: () => {
+              booking.status = newStatus;
+              this.refreshDisplay();
               this._showSnackbar = true;
               this.snackbarMessage = 'Booking status updated successfully';
+              this._cdr.markForCheck();
             },
             error: () => {
               this.snackbarMessage = 'Failed to update booking status';
               this._showSnackbar = true;
+              this._cdr.markForCheck();
             },
           });
       }
@@ -217,57 +186,26 @@ export class BookingListComponent implements OnInit, OnDestroy {
       },
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().pipe(takeUntil(this._destroy$)).subscribe((result) => {
       if (result) {
         this._bookingService
           .deleteBooking(booking.id)
-          .pipe()
+          .pipe(takeUntil(this._destroy$))
           .subscribe({
             next: () => {
               this.bookings = this.bookings.filter((b) => b.id !== booking.id);
-              this.calculateStats();
-              this.applyFilters();
+              this.refreshDisplay();
+              this._showSnackbar = true;
+              this.snackbarMessage = 'Booking deleted successfully';
+              this._cdr.markForCheck();
             },
-            error: (err) => {
-              alert('Failed to delete booking');
-              console.error('Error deleting booking:', err);
+            error: () => {
+              this.snackbarMessage = 'Failed to delete booking';
+              this._showSnackbar = true;
+              this._cdr.markForCheck();
             },
           });
       }
-    });
-  }
-
-  getStatusClass(status: string): string {
-    switch (status) {
-      case 'confirmed':
-        return 'status-confirmed';
-      case 'pending':
-        return 'status-pending';
-      case 'cancelled':
-        return 'status-cancelled';
-      default:
-        return '';
-    }
-  }
-
-  formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  }
-
-  to12Hour(time24: any): string {
-    const [h, m, s] = time24.split(':');
-    const date = new Date();
-    date.setHours(h, m, s);
-
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
     });
   }
 

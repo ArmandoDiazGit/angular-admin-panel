@@ -17,7 +17,7 @@ import { CommonModule } from '@angular/common';
 export class SnackbarComponent {
   @ViewChild('snackbar') snackbar!: TemplateRef<HTMLElement>;
   public viewContainer = inject(ViewContainerRef);
-  public timer!: ReturnType<typeof setTimeout> | null;
+  public timer: ReturnType<typeof setTimeout> | null = null;
 
   show() {
     if (this.timer) {
