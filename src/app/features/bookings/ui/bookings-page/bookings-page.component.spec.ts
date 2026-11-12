@@ -4,6 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 import { BookingsPageComponent } from './bookings-page.component';
+import { BookingsStore } from '../../data/bookings-store';
 
 describe('BookingsPageComponent', () => {
   let component: BookingsPageComponent;
@@ -13,6 +14,7 @@ describe('BookingsPageComponent', () => {
     await TestBed.configureTestingModule({
       imports: [BookingsPageComponent],
       providers: [
+        BookingsStore,
         provideNoopAnimations(),
         provideHttpClient(),
         provideHttpClientTesting(),

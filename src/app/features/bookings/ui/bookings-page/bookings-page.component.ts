@@ -15,7 +15,7 @@ import {
   ConfirmDialogComponent,
 } from '@shared/ui/confirm-dialog/confirm-dialog.component';
 import { BookingsStore } from '../../data/bookings-store';
-import { Booking, BookingStatus } from '../../model/booking';
+import { Booking } from '../../model/booking';
 import { StatusChange } from '../booking-row/booking-row.component';
 import { BookingsFiltersComponent } from '../bookings-filters/bookings-filters.component';
 import { BookingsStatsComponent } from '../bookings-stats/bookings-stats.component';
@@ -28,7 +28,6 @@ import { BookingsTableComponent } from '../bookings-table/bookings-table.compone
 @Component({
   selector: 'app-bookings-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [BookingsStore],
   imports: [
     BookingsStatsComponent,
     BookingsFiltersComponent,
