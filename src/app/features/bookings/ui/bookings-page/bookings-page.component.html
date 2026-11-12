@@ -5,207 +5,43 @@
     </div>
   </header>
 
-  <div class="stats-grid">
-    <div class="stat-card total">
-      <div class="stat-icon">📊</div>
-      <div class="stat-content">
-        <div class="stat-value">{{ stats.total }}</div>
-        <div class="stat-label">Total Bookings</div>
-      </div>
+  <app-bookings-stats [stats]="stats()" />
+
+  <app-bookings-filters
+    [searchTerm]="searchTerm()"
+    [statusFilter]="statusFilter()"
+    [refreshing]="refreshing()"
+    [connected]="!loading() && !error()"
+    (searchTermChange)="searchTerm.set($event)"
+    (statusFilterChange)="statusFilter.set($event)"
+    (refresh)="refresh()"
+  />
+
+  @if (loading()) {
+    <div class="loading-state" role="status">
+      <div class="spinner" aria-hidden="true"></div>
+      <p>Loading appointments...</p>
     </div>
-
-    <div class="stat-card pending">
-      <div class="stat-icon">⏳</div>
-      <div class="stat-content">
-        <div class="stat-value">{{ stats.pending }}</div>
-        <div class="stat-label">Pending</div>
-      </div>
+  } @else if (error()) {
+    <div class="error-state" role="alert">
+      <p>{{ error() }}</p>
+      <button type="button" class="retry-button" (click)="retry()">Try Again</button>
     </div>
-
-    <div class="stat-card confirmed">
-      <div class="stat-icon">✅</div>
-      <div class="stat-content">
-        <div class="stat-value">{{ stats.confirmed }}</div>
-        <div class="stat-label">Confirmed</div>
-      </div>
-    </div>
-
-    <div class="stat-card cancelled">
-      <div class="stat-icon">❌</div>
-      <div class="stat-content">
-        <div class="stat-value">{{ stats.cancelled }}</div>
-        <div class="stat-label">Cancelled</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="controls-section">
-    <div class="search-box">
-        <input
-          type="text"
-          name="searchTerm"
-          [(ngModel)]="searchTerm"
-          (input)="onSearchChange()"
-          placeholder="🔍 Search by name"
-          class="search-input"
-        />
-    </div>
-
-    <div class="filters">
-      <div class="filter-group">
-        <label>Status:</label>
-        <select
-          name="statusFilter"
-          [(ngModel)]="statusFilter"
-          (change)="onStatusFilterChange()"
-          class="filter-select"
-        >
-          <option value="all">All Statuses</option>
-          <option value="pending">Pending</option>
-          <option value="confirmed">Confirmed</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-      </div>
-
-      <button (click)="loadBookings()" class="refresh-button" [class.refreshing]="refreshing">
-        <span class="refresh-icon" [class.spinning]="refreshing">🔄</span>
-        {{ refreshing ? 'Refreshing...' : 'Refresh' }}
-      </button>
-      <span class="live-indicator" [class.connected]="!loading && !error">● Live</span>
-    </div>
-  </div>
-
-  <div *ngIf="loading" class="loading-state">
-    <div class="spinner"></div>
-    <p>Loading appointments...</p>
-  </div>
-
-  <div *ngIf="error && !loading" class="error-state">
-    <p>{{ error }}</p>
-    <button (click)="loadBookings()" class="retry-button">Try Again</button>
-  </div>
-
-  <div *ngIf="!loading && !error" class="table-container">
-    <div *ngIf="filteredBookings.length === 0" class="empty-state">
-      <div class="empty-icon">📭</div>
+  } @else if (filteredBookings().length === 0) {
+    <div class="empty-state" role="status">
+      <div class="empty-icon" aria-hidden="true">📭</div>
       <h3>No appointments found</h3>
-      <p *ngIf="searchTerm || statusFilter !== 'all'">
-        Try adjusting your filters
-      </p>
-      <p *ngIf="!searchTerm && statusFilter === 'all'">
-        No appointments have been booked yet
-      </p>
+      @if (searchTerm() || statusFilter() !== 'all') {
+        <p>Try adjusting your filters</p>
+      } @else {
+        <p>No appointments have been booked yet</p>
+      }
     </div>
-
-    <table
-      class="bookings-table"
-      *ngIf="filteredBookings.length > 0"
-    >
-      <thead>
-        <tr>
-          <th>Customer</th>
-          <th>Service</th>
-          <th>Appointment</th>
-          <th>Contact</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let booking of filteredBookings; trackBy: trackByBookingId" class="booking-row">
-          <td>
-            <div class="customer-info">
-              <div class="customer-name">{{ booking.name }}</div>
-              <div class="customer-email">{{ booking.email }}</div>
-            </div>
-          </td>
-
-          <td>
-            <div class="service-info">
-              <strong>{{ booking.service }}</strong>
-              <div
-                *ngIf="booking.notes"
-                class="notes-preview"
-                [title]="booking.notes"
-              >
-                📝 {{ booking.notes.substring(0, 30)
-                }}{{ booking.notes.length > 30 ? "..." : "" }}
-              </div>
-            </div>
-          </td>
-
-          <td>
-            <div class="appointment-info">
-              <div class="appointment-date">
-                📅 {{ booking.scheduled_at | formatDate }}
-              </div>
-              <div class="appointment-time">
-                🕐 {{ booking.time | to12Hour }}
-              </div>
-            </div>
-          </td>
-
-          <td>
-            <div class="contact-info">
-              <a [href]="'tel:' + booking.phone" class="phone-link">
-                📞 {{ booking.phone }}
-              </a>
-            </div>
-          </td>
-
-          <td>
-            <span
-              class="status-badge"
-              [ngClass]="booking.status | statusClass"
-            >
-              {{ booking.status | uppercase }}
-            </span>
-          </td>
-
-          <td>
-            <div class="action-buttons">
-              <button
-                *ngIf="booking.status === 'pending'"
-                (click)="updateStatus(booking, 'confirmed')"
-                class="btn-confirm"
-                title="Confirm Appointment"
-              >
-                ✓ Confirm
-              </button>
-
-              <button
-                *ngIf="
-                  booking.status === 'pending' || booking.status === 'confirmed'
-                "
-                (click)="updateStatus(booking, 'cancelled')"
-                class="btn-pending"
-                title="Cancel Appointment"
-              >
-                ✕ Cancel
-              </button>
-
-              <button
-                *ngIf="booking.status === 'cancelled'"
-                (click)="updateStatus(booking, 'pending')"
-                class="btn-restore"
-                title="Restore to Pending"
-              >
-                ↺ Restore
-              </button>
-
-              <button
-                (click)="deleteBooking(booking)"
-                class="btn-cancel"
-                title="Delete Appointment"
-              >
-                Delete
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  } @else {
+    <app-bookings-table
+      [bookings]="filteredBookings()"
+      (statusChange)="onStatusChange($event)"
+      (delete)="onDelete($event)"
+    />
+  }
 </div>
-
-<app-snackbar-component>{{ snackbarMessage }}</app-snackbar-component>

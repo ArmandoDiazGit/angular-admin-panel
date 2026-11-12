@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { Observable, startWith, switchMap } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { ApiClient } from '@core/api/api-client';
 import { Booking, BookingStatus } from '../model/booking';
@@ -20,12 +20,9 @@ export class BookingApi {
     return this.api.get<BookingsResponse>('/bookings');
   }
 
-  /** Emits the current bookings now and again whenever the server signals a change. */
-  watchLive(): Observable<BookingsResponse> {
-    return this.api.eventStream('/events').pipe(
-      startWith(undefined),
-      switchMap(() => this.getAll()),
-    );
+  /** Emits a tick whenever the server signals that bookings changed. */
+  events(): Observable<void> {
+    return this.api.eventStream('/events');
   }
 
   updateStatus(booking: Booking, status: BookingStatus): Observable<void> {

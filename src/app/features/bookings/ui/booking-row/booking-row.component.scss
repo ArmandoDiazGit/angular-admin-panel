@@ -1,0 +1,163 @@
+:host {
+  border-bottom: 1px solid #e2e8f0;
+  transition: background-color 0.2s ease;
+}
+
+:host(:hover) {
+  background-color: #f7fafc;
+}
+
+td {
+  padding: 20px;
+  vertical-align: top;
+}
+
+/* Customer Info */
+.customer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.customer-name {
+  font-weight: 600;
+  color: var(--charcoal);
+  font-size: 1rem;
+}
+
+.customer-email {
+  color: #718096;
+  font-size: 0.9rem;
+}
+
+/* Service Info */
+.service-info strong {
+  color: var(--sage-dark);
+  font-size: 0.95rem;
+}
+
+.notes-preview {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: #718096;
+  font-style: italic;
+}
+
+/* Appointment Info */
+.appointment-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.appointment-date,
+.appointment-time {
+  font-size: 0.95rem;
+  color: var(--charcoal);
+}
+
+/* Contact Info */
+.phone-link {
+  color: var(--sage-dark);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.phone-link:hover {
+  color: var(--sage);
+  text-decoration: underline;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.status-confirmed {
+  background: rgba(72, 187, 120, 0.15);
+  color: #2f855a;
+}
+
+.status-pending {
+  background: rgba(246, 173, 85, 0.15);
+  color: #c05621;
+}
+
+.status-cancelled {
+  background: rgba(245, 101, 101, 0.15);
+  color: #c53030;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-confirm,
+.btn-cancel,
+.btn-restore,
+.btn-pending {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-pending {
+  background: rgba(246, 173, 85, 0.15);
+  color: #c05621;
+}
+
+.btn-pending:hover {
+  background: #ed8936;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.btn-confirm {
+  background: #48bb78;
+  color: white;
+}
+
+.btn-confirm:hover {
+  background: #38a169;
+  transform: translateY(-2px);
+}
+
+.btn-cancel {
+  background: #f56565;
+  color: white;
+}
+
+.btn-cancel:hover {
+  background: #e53e3e;
+  transform: translateY(-2px);
+}
+
+.btn-restore {
+  background: #4299e1;
+  color: white;
+}
+
+.btn-restore:hover {
+  background: #3182ce;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 1200px) {
+  td {
+    padding: 15px 12px;
+  }
+}

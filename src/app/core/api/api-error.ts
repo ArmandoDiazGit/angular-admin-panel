@@ -30,3 +30,13 @@ export function toApiError(error: unknown): ApiError {
     cause: error,
   };
 }
+
+export function isApiError(value: unknown): value is ApiError {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'status' in value &&
+    'message' in value &&
+    typeof (value as ApiError).message === 'string'
+  );
+}

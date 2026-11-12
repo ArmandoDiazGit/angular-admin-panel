@@ -1,20 +1,25 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
-import { BookingListComponent } from './bookings-page.component';
+import { BookingsPageComponent } from './bookings-page.component';
 
-describe('BookingListComponent', () => {
-  let component: BookingListComponent;
-  let fixture: ComponentFixture<BookingListComponent>;
+describe('BookingsPageComponent', () => {
+  let component: BookingsPageComponent;
+  let fixture: ComponentFixture<BookingsPageComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [BookingListComponent, NoopAnimationsModule],
-      providers: [provideHttpClient()],
+      imports: [BookingsPageComponent],
+      providers: [
+        provideNoopAnimations(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(BookingListComponent);
+    fixture = TestBed.createComponent(BookingsPageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
