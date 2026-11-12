@@ -20,9 +20,52 @@ The purpose of this admin panel is to allow administrators to view and manage bo
 
 * Admin panel UI layout
 
-* Bookings view (structure in place)
+* Bookings dashboard with live updates (server-sent events), search by name and status filtering
 
-* Component-based architecture
+* Status changes (confirm / cancel / restore) and deletion, both behind a confirmation dialog
+
+* Per-status statistics derived from the loaded bookings
+
+* Lazy-loaded bookings feature, standalone components and OnPush change detection
+
+## 🧱 Project Structure
+
+The app is organized by feature, not by file type. One feature, one folder.
+
+```text
+src/app/
+  app.component.ts / app.config.ts / app.routes.ts
+  core/
+    api/                     # ApiClient: base URL, SSE boundary, error mapping
+  shared/
+    ui/confirm-dialog/       # generic, reusable UI
+  features/
+    bookings/
+      bookings.routes.ts     # lazy-loaded feature route + store provider
+      api/                   # typed endpoints only (BookingApi)
+      model/                 # domain types and pure selectors
+      data/                  # BookingsStore (signal state)
+      ui/                    # page + stats, filters, table, row components
+      index.ts               # public surface of the feature
+```
+
+Rules enforced by ESLint (`import/no-restricted-paths`):
+
+* `features/*` may import `core/*` and `shared/*`; features never import each other.
+* `shared/*` and `core/*` must not depend on a feature.
+* Path aliases (`@app`, `@core`, `@shared`, `@features`, `@env`, `@testing`) replace deep relative imports.
+
+State lives in signals inside `BookingsStore`: server data, loading/error flags and
+filter state, with `stats` and `filteredBookings` as `computed` values. Components
+never call `markForCheck`, never subscribe to HTTP directly, and never recompute
+derived lists by hand.
+
+## 🛠️ Scripts
+
+* `npm start` — dev server at http://localhost:4200/admin
+* `npm run build` — production build (enforces bundle and component-style budgets)
+* `npm test` — Karma/Jasmine unit tests
+* `npm run lint` — ESLint, including the architectural boundaries
 
 ## 🔒 Planned Features
 

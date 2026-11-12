@@ -37,7 +37,7 @@ export function filterAndSort(
 
   const direction = filters.sortOrder === 'asc' ? 1 : -1;
 
-  filtered.sort((a, b) => direction * compare(a, b, filters.sortBy));
+  filtered.sort((a, b) => compare(a, b, filters.sortBy, direction));
 
   return filtered;
 }
@@ -57,27 +57,34 @@ export function calculateStats(bookings: readonly Booking[]): BookingStats {
   );
 }
 
-function compare(a: Booking, b: Booking, sortBy: SortBy): number {
-  switch (sortBy) {
-    case 'date':
-      return appointmentTime(a) - appointmentTime(b);
-    case 'created':
-      return dateValue(a.created) - dateValue(b.created);
-    case 'name':
-      return a.name.localeCompare(b.name);
+function compare(a: Booking, b: Booking, sortBy: SortBy, direction: number): number {
+  if (sortBy === 'name') {
+    return direction * a.name.localeCompare(b.name);
   }
+
+  const aValue = sortBy === 'date' ? appointmentTime(a) : dateValue(a.created);
+  const bValue = sortBy === 'date' ? appointmentTime(b) : dateValue(b.created);
+
+  const aInvalid = Number.isNaN(aValue);
+  const bInvalid = Number.isNaN(bValue);
+
+  // Unparseable dates always sink to the bottom, whichever direction is active.
+  if (aInvalid || bInvalid) {
+    if (aInvalid && bInvalid) return 0;
+    return aInvalid ? 1 : -1;
+  }
+
+  return direction * (aValue - bValue);
 }
 
 /**
- * `new Date('2026-01-01 10:00')` is not valid in every browser. Building the
- * timestamp from an ISO-ish string is portable, and an unparseable value sorts
- * to the bottom instead of producing NaN.
+ * `new Date('2026-01-01 10:00')` is not valid in every browser, so the
+ * timestamp is built from an ISO-ish string instead.
  */
 function appointmentTime(booking: Booking): number {
   return dateValue(`${booking.date}T${booking.time}`);
 }
 
 function dateValue(value: string): number {
-  const time = new Date(value).getTime();
-  return Number.isNaN(time) ? 0 : time;
+  return new Date(value).getTime();
 }

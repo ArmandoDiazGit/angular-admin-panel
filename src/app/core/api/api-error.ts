@@ -9,19 +9,21 @@ export interface ApiError {
 
 export function toApiError(error: unknown): ApiError {
   if (error instanceof HttpErrorResponse) {
+    const body = error.error;
+
     const detail =
-      typeof error.error === 'object' && error.error !== null
-        ? (error.error as { detail?: unknown }).detail
+      typeof body === 'object' && body !== null
+        ? (body as { detail?: unknown }).detail
         : undefined;
 
-    return {
-      status: error.status,
-      message:
-        typeof detail === 'string'
-          ? detail
-          : error.message || 'The request failed. Please try again.',
-      cause: error,
-    };
+    const message =
+      typeof detail === 'string'
+        ? detail
+        : typeof body === 'string' && body.trim()
+          ? body
+          : error.message || 'The request failed. Please try again.';
+
+    return { status: error.status, message, cause: error };
   }
 
   return {
