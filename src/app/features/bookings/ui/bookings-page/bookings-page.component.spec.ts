@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-import { BookingListComponent } from './booking-list.component';
+import { BookingListComponent } from './bookings-page.component';
 
 describe('BookingListComponent', () => {
   let component: BookingListComponent;

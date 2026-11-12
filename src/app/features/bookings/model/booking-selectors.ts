@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Booking } from '../models/booking';
+import { Booking } from './booking';
 
 export interface BookingStats {
   total: number;

@@ -7,17 +7,17 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
 } from '@angular/core';
-import { BookingService } from '../../services/booking.service';
-import { BookingUtilsService } from '../../services/booking-utils.service';
-import { Booking } from '../../models/booking';
+import { BookingService } from '@features/bookings/api/booking-api';
+import { BookingUtilsService } from '@features/bookings/model/booking-selectors';
+import { Booking } from '@features/bookings/model/booking';
 import { UpperCasePipe, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
-import { SnackbarComponent } from '../snackbar-component/snackbar.component';
-import { FormatDatePipe } from '../../pipes/format-date.pipe';
-import { To12HourPipe } from '../../pipes/to-12-hour.pipe';
-import { StatusClassPipe } from '../../pipes/status-class.pipe';
+import { ConfirmDialogComponent } from '@shared/ui/confirm-dialog/confirm-dialog.component';
+import { SnackbarComponent } from '@app/components/snackbar-component/snackbar.component';
+import { FormatDatePipe } from '../pipes/format-date.pipe';
+import { To12HourPipe } from '../pipes/to-12-hour.pipe';
+import { StatusClassPipe } from '../pipes/status-class.pipe';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -32,8 +32,8 @@ import { Subject, takeUntil } from 'rxjs';
     To12HourPipe,
     StatusClassPipe,
   ],
-  templateUrl: './booking-list.component.html',
-  styleUrl: './booking-list.component.scss',
+  templateUrl: './bookings-page.component.html',
+  styleUrl: './bookings-page.component.scss',
 })
 export class BookingListComponent implements OnInit, OnDestroy {
   bookings: Booking[] = [];

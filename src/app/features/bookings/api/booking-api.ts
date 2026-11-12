@@ -1,9 +1,9 @@
 import { Injectable, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, startWith, switchMap } from 'rxjs';
-import { Booking } from '../models/booking';
-import { BookingsResponse } from '../models/bookingResponse-model';
-import { environment } from '../../environments/environment';
+import { Booking } from '../model/booking';
+import { BookingsResponse } from './booking-api.types';
+import { environment } from '@env/environment';
 
 @Injectable({
   providedIn: 'root',

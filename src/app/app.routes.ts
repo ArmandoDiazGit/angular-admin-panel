@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { BookingListComponent } from './components/booking-list/booking-list.component';
+import { BookingListComponent } from '@features/bookings/ui/bookings-page/bookings-page.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: '/admin', pathMatch: 'full' },
