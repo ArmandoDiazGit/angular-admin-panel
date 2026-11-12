@@ -1,67 +1,41 @@
-import { Injectable, NgZone } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
 import { Observable, startWith, switchMap } from 'rxjs';
-import { Booking } from '../model/booking';
-import { BookingsResponse } from './booking-api.types';
-import { environment } from '@env/environment';
 
-@Injectable({
-  providedIn: 'root',
-})
-export class BookingService {
-  private _apiUrl = environment.apiUrl;
+import { ApiClient } from '@core/api/api-client';
+import { Booking, BookingStatus } from '../model/booking';
+import {
+  BookingsResponse,
+  toUpdateBookingPayload,
+} from './booking-api.types';
 
-  constructor(
-    private http: HttpClient,
-    private _ngZone: NgZone,
-  ) {}
+/**
+ * Typed bookings endpoints. This layer knows nothing about components or state;
+ * it only turns HTTP and the SSE feed into observables of domain data.
+ */
+@Injectable({ providedIn: 'root' })
+export class BookingApi {
+  private readonly api = inject(ApiClient);
 
-  getAllBookings(): Observable<BookingsResponse> {
-    return this.http.get<BookingsResponse>(`${this._apiUrl}/bookings`);
+  getAll(): Observable<BookingsResponse> {
+    return this.api.get<BookingsResponse>('/bookings');
   }
 
-  private subscribeToEvents(): Observable<void> {
-    return new Observable<void>((observer) => {
-      const source = new EventSource(`${this._apiUrl}/events`);
-      source.onmessage = () => {
-        this._ngZone.run(() => observer.next());
-      };
-      source.onerror = () => {};
-      return () => source.close();
-    });
-  }
-
-  watchBookings(): Observable<BookingsResponse> {
-    return this.subscribeToEvents().pipe(
+  /** Emits the current bookings now and again whenever the server signals a change. */
+  watchLive(): Observable<BookingsResponse> {
+    return this.api.eventStream('/events').pipe(
       startWith(undefined),
-      switchMap(() => this.getAllBookings()),
+      switchMap(() => this.getAll()),
     );
   }
 
-  updateBookingStatus(
-    booking: Booking,
-    status: Booking['status'],
-  ): Observable<void> {
-    const payload = {
-      name: booking.name,
-      email: booking.email,
-      phone: booking.phone,
-      service: booking.service,
-      date: booking.date,
-      time: booking.time,
-      notes: booking.notes,
-      status: status,
-      scheduled_at: booking.scheduled_at,
-    };
-    return this.http.put<void>(
-      `${this._apiUrl}/booking/${booking.id}`,
-      payload,
+  updateStatus(booking: Booking, status: BookingStatus): Observable<void> {
+    return this.api.put<void>(
+      `/booking/${booking.id}`,
+      toUpdateBookingPayload(booking, status),
     );
   }
 
-  deleteBooking(bookingId: number): Observable<void> {
-    return this.http.delete<void>(
-      `${this._apiUrl}/booking/${bookingId}`,
-    );
+  remove(bookingId: number): Observable<void> {
+    return this.api.delete<void>(`/booking/${bookingId}`);
   }
 }

@@ -1,3 +1,5 @@
+export type BookingStatus = 'pending' | 'confirmed' | 'cancelled';
+
 export interface Booking {
   id: number;
   name: string;
@@ -7,7 +9,7 @@ export interface Booking {
   date: string;
   time: string;
   notes: string;
-  status: 'pending' | 'confirmed' | 'cancelled';
+  status: BookingStatus;
   created: string;
   updated_at: string;
   scheduled_at: string;

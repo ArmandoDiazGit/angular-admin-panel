@@ -7,9 +7,9 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
 } from '@angular/core';
-import { BookingService } from '@features/bookings/api/booking-api';
-import { BookingUtilsService } from '@features/bookings/model/booking-selectors';
-import { Booking } from '@features/bookings/model/booking';
+import { BookingApi } from '@features/bookings/api/booking-api';
+import { calculateStats, filterAndSort, SortBy, SortOrder } from '@features/bookings/model/booking-selectors';
+import { Booking, BookingStatus } from '@features/bookings/model/booking';
 import { UpperCasePipe, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -44,9 +44,9 @@ export class BookingListComponent implements OnInit, OnDestroy {
   refreshing: boolean = false;
 
   searchTerm: string = '';
-  statusFilter: string = 'all';
-  sortBy: string = 'created';
-  sortOrder: 'asc' | 'desc' = 'desc';
+  statusFilter: BookingStatus | 'all' = 'all';
+  sortBy: SortBy = 'created';
+  sortOrder: SortOrder = 'desc';
 
   stats = {
     total: 0,
@@ -62,8 +62,7 @@ export class BookingListComponent implements OnInit, OnDestroy {
   private _destroy$ = new Subject<void>();
 
   constructor(
-    private _bookingService: BookingService,
-    private _bookingUtils: BookingUtilsService,
+    private _bookingService: BookingApi,
     private _dialog: MatDialog,
     private _cdr: ChangeDetectorRef,
   ) {
@@ -76,7 +75,7 @@ export class BookingListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this._bookingService
-      .watchBookings()
+      .watchLive()
       .pipe(takeUntil(this._destroy$))
       .subscribe({
         next: (bookings) => {
@@ -109,7 +108,7 @@ export class BookingListComponent implements OnInit, OnDestroy {
   loadBookings(): void {
     this.refreshing = true;
     this._bookingService
-      .getAllBookings()
+      .getAll()
       .pipe(takeUntil(this._destroy$))
       .subscribe({
         next: (bookings) => {
@@ -128,8 +127,8 @@ export class BookingListComponent implements OnInit, OnDestroy {
   }
 
   private refreshDisplay(): void {
-    this.stats = this._bookingUtils.calculateStats(this.bookings);
-    this.filteredBookings = this._bookingUtils.filterAndSort(this.bookings, {
+    this.stats = calculateStats(this.bookings);
+    this.filteredBookings = filterAndSort(this.bookings, {
       statusFilter: this.statusFilter,
       searchTerm: this.searchTerm,
       sortBy: this.sortBy,
@@ -157,7 +156,7 @@ export class BookingListComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().pipe(takeUntil(this._destroy$)).subscribe((result) => {
       if (result) {
         this._bookingService
-          .updateBookingStatus(booking, newStatus)
+          .updateStatus(booking, newStatus)
           .pipe(takeUntil(this._destroy$))
           .subscribe({
             next: () => {
@@ -189,7 +188,7 @@ export class BookingListComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().pipe(takeUntil(this._destroy$)).subscribe((result) => {
       if (result) {
         this._bookingService
-          .deleteBooking(booking.id)
+          .remove(booking.id)
           .pipe(takeUntil(this._destroy$))
           .subscribe({
             next: () => {
